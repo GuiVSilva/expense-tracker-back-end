@@ -32,7 +32,7 @@ app.register(cors, {
 app.register(jwt, {
   secret: process.env.JWT_SECRET || 'fallback-secret-apenas-para-dev',
   sign: {
-    expiresIn: '7d'
+    expiresIn: '1d'
   }
 })
 

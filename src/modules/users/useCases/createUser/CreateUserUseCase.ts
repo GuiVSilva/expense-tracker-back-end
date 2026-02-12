@@ -3,6 +3,8 @@ import { hash } from 'bcryptjs'
 import type { ICreateUserDTO } from '../../dto/ICreateUserDTO.js'
 import type { IUsersRepository } from '../../repositories/IUsersRepository.js'
 import { AppError } from '../../../../shared/errors/AppError.js'
+import { WelcomeTemplate } from '../../../../shared/container/providers/MailProvider/templates/WelcomeTemplate.js'
+import type { IMailProvider } from '../../../../shared/container/providers/MailProvider/IMailProvider.js'
 
 interface IResponse {
   user: {
@@ -16,7 +18,9 @@ interface IResponse {
 export class CreateUserUseCase {
   constructor(
     @inject('UsersRepository')
-    private usersRepository: IUsersRepository
+    private usersRepository: IUsersRepository,
+    @inject('MailProvider')
+    private mailProvider: IMailProvider
   ) {}
 
   async execute(
@@ -38,6 +42,17 @@ export class CreateUserUseCase {
     })
 
     const token = await signToken({ sub: user.id })
+
+    const htmlBody = WelcomeTemplate.generate({
+      userName: user.name,
+      email: user.email
+    })
+
+    await this.mailProvider.sendMail(
+      email,
+      '🎉 Bem-vindo ao ExpenseTracker!',
+      htmlBody
+    )
 
     return {
       user: {
