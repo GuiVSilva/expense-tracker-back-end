@@ -4,7 +4,7 @@ import { FindAllCategoriesController } from '../../../modules/categories/useCase
 const findAllCategoriesController = new FindAllCategoriesController()
 
 export async function categoriesRoutes(app: FastifyInstance) {
-  app.get('/all-categories', (request, reply) =>
+  app.get('/', (request, reply) =>
     findAllCategoriesController.handle(request, reply)
   )
 }
