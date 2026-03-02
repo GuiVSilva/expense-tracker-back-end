@@ -14,7 +14,7 @@ model User {
   password     String
   createdAt    DateTime      @default(now())
   transactions Transaction[]
-  tokens   UserToken[]
+  tokens       UserToken[]
 
   @@map("users")
 }
@@ -25,14 +25,17 @@ enum TransactionType {
 }
 
 model Transaction {
-  id          String          @id @default(uuid())
+  id          Int             @id @default(autoincrement())
   description String
   amount      Decimal
   type        TransactionType
-  category    String
+  categoryId  Int             @map("category_id")
   date        DateTime        @default(now())
   userId      String
   user        User            @relation(fields: [userId], references: [id])
+  category    Categories      @relation(fields: [categoryId], references: [id])
+
+  @@index([categoryId])
 
   @@map("transactions")
 }
@@ -47,4 +50,12 @@ model UserToken {
   user_id String
 
   @@map("user_tokens")
+}
+
+model Categories {
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  transactions Transaction[]
+
+  @@map("categories")
 }
