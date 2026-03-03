@@ -20,8 +20,8 @@ model User {
 }
 
 enum TransactionType {
-  INCOME
-  EXPENSE
+  INCOME  @map("income")
+  EXPENSE @map("expense")
 }
 
 model Transaction {
@@ -31,12 +31,12 @@ model Transaction {
   type        TransactionType
   categoryId  Int             @map("category_id")
   date        DateTime        @default(now())
+  method      String
   userId      String
   user        User            @relation(fields: [userId], references: [id])
   category    Categories      @relation(fields: [categoryId], references: [id])
 
   @@index([categoryId])
-
   @@map("transactions")
 }
 

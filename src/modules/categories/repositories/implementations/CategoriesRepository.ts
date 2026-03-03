@@ -7,4 +7,11 @@ export class CategoriesRepository implements ICategoriesRepository {
     const categories = await prisma.categories.findMany()
     return categories
   }
+
+  async findById(id: number): Promise<Categories | null> {
+    const category = await prisma.categories.findUnique({
+      where: { id }
+    })
+    return category
+  }
 }
