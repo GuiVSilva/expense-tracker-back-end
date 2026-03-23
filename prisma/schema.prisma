@@ -31,7 +31,9 @@ model Transaction {
   type        TransactionType
   categoryId  Int             @map("category_id")
   date        DateTime        @default(now())
+  createdAt   DateTime        @default(now()) @map("created_at")
   method      String
+  active      Boolean         @default(true)
   userId      String
   user        User            @relation(fields: [userId], references: [id])
   category    Categories      @relation(fields: [categoryId], references: [id])
