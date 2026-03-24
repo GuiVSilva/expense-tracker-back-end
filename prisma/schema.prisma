@@ -8,13 +8,14 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(uuid())
-  name         String
-  email        String        @unique
-  password     String
-  createdAt    DateTime      @default(now())
-  transactions Transaction[]
-  tokens       UserToken[]
+  id                String             @id @default(uuid())
+  name              String
+  email             String             @unique
+  password          String
+  createdAt         DateTime           @default(now())
+  transactions      Transaction[]
+  tokens            UserToken[]
+  financialAccounts FinancialAccount[]
 
   @@map("users")
 }
@@ -27,7 +28,7 @@ enum TransactionType {
 model Transaction {
   id          Int             @id @default(autoincrement())
   description String
-  amount      Decimal
+  amount      Decimal         @db.Decimal(10, 2)
   type        TransactionType
   categoryId  Int             @map("category_id")
   date        DateTime        @default(now())
@@ -39,6 +40,9 @@ model Transaction {
   category    Categories      @relation(fields: [categoryId], references: [id])
 
   @@index([categoryId])
+  @@index([userId])
+  @@index([userId, date])
+  @@index([userId, type])
   @@map("transactions")
 }
 
@@ -55,9 +59,70 @@ model UserToken {
 }
 
 model Categories {
-  id           Int           @id @default(autoincrement())
-  name         String        @unique
-  transactions Transaction[]
+  id                Int                @id @default(autoincrement())
+  name              String             @unique
+  transactions      Transaction[]
+  financialAccounts FinancialAccount[]
 
   @@map("categories")
+}
+
+enum AccountType {
+  RECEIVABLE @map("receivable")
+  PAYABLE    @map("payable")
+}
+
+enum AccountStatus {
+  PENDING  @map("pending")
+  PAID     @map("paid")
+  PARTIAL  @map("partial")
+  OVERDUE  @map("overdue")
+  CANCELED @map("canceled")
+}
+
+model FinancialAccount {
+  id                       Int                       @id @default(autoincrement())
+  description              String
+  type                     AccountType
+  categoryId               Int                       @map("category_id")
+  dueDate                  DateTime                  @map("due_date")
+  amount                   Decimal                   @default(0) @db.Decimal(10, 2)
+  amountPaid               Decimal                   @default(0) @map("amount_paid") @db.Decimal(10, 2)
+  status                   AccountStatus             @default(PENDING)
+  installmentNumber        Int?                      @map("installment_number")
+  installmentTotal         Int?                      @map("installment_total")
+  userId                   String
+  createdAt                DateTime                  @default(now()) @map("created_at")
+  updatedAt                DateTime                  @updatedAt @map("updated_at")
+  user                     User                      @relation(fields: [userId], references: [id])
+  category                 Categories                @relation(fields: [categoryId], references: [id])
+  financialAccountPayments FinancialAccountPayment[]
+
+  @@index([userId, type])
+  @@index([userId, status])
+  @@index([userId, dueDate])
+  @@map("financial_accounts")
+}
+
+enum FinancialAccountPaymentMethod {
+  CASH        @map("cash")
+  PIX         @map("pix")
+  BANK_SLIP   @map("bank_slip")
+  CREDIT_CARD @map("credit_card")
+  DEBIT_CARD  @map("debit_card")
+  TRANSFER    @map("transfer")
+}
+
+model FinancialAccountPayment {
+  id                 Int                           @id @default(autoincrement())
+  financialAccountId Int                           @map("financial_account_id")
+  amount             Decimal                       @db.Decimal(10, 2)
+  method             FinancialAccountPaymentMethod
+  paymentDate        DateTime                      @map("payment_date")
+  createdAt          DateTime                      @default(now()) @map("created_at")
+
+  financialAccount FinancialAccount @relation(fields: [financialAccountId], references: [id])
+
+  @@index([financialAccountId])
+  @@map("financial_account_payments")
 }
