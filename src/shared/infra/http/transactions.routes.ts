@@ -7,10 +7,15 @@ import {
   DeleteTransactionController,
   type DeleteTransactionBody
 } from '../../../modules/transactions/useCases/deleteTransaction/DeleteTransactionController.js'
+import {
+  ExportTransactionsController,
+  type ExportTransactionsQuery
+} from '../../../modules/transactions/useCases/exportTransactions/ExportTransactionsController.js'
 
 const createTransactionController = new CreateTransactionController()
 const listTransactionsController = new ListTransactionsController()
 const deleteTransactionController = new DeleteTransactionController()
+const exportTransactionsController = new ExportTransactionsController()
 
 export async function transactionsRoutes(app: FastifyInstance) {
   app.addHook('onRequest', ensureAuthenticated)
@@ -25,5 +30,10 @@ export async function transactionsRoutes(app: FastifyInstance) {
 
   app.put<{ Body: DeleteTransactionBody }>('/delete', (request, reply) =>
     deleteTransactionController.handle(request, reply)
+  )
+
+  app.get<{ Querystring: ExportTransactionsQuery }>(
+    '/export',
+    (request, reply) => exportTransactionsController.handle(request, reply)
   )
 }

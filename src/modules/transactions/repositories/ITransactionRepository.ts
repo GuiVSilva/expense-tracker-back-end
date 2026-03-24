@@ -19,5 +19,19 @@ export interface ITransactionRepository {
     total: number
     summary: { income: number; expense: number; balance: number }
   }>
+  export(
+    dateFrom: string,
+    dateTo: string,
+    category: string,
+    userId: string
+  ): Promise<
+    {
+      Descricao: string
+      Categoria: string
+      Data: Date
+      Metodo: string
+      Valor: number
+    }[]
+  >
   save(transaction: Transaction): Promise<void>
 }

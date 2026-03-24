@@ -130,4 +130,53 @@ export class TransactionRepository implements ITransactionRepository {
       data: transaction
     })
   }
+
+  async export(
+    dateFrom: string,
+    dateTo: string,
+    category: string,
+    userId: string
+  ): Promise<
+    {
+      Descricao: string
+      Categoria: string
+      Data: Date
+      Metodo: string
+      Valor: number
+    }[]
+  > {
+    const normalizedCategory = category === 'all' ? undefined : Number(category)
+    const startDate = new Date(`${dateFrom}T00:00:00.000Z`)
+    const endDate = new Date(`${dateTo}T23:59:59.999Z`)
+
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        userId,
+        active: true,
+        ...(normalizedCategory && { categoryId: normalizedCategory }),
+        date: {
+          gte: startDate,
+          lte: endDate
+        }
+      },
+      include: {
+        category: {
+          select: {
+            name: true
+          }
+        }
+      },
+      orderBy: {
+        date: 'desc'
+      }
+    })
+
+    return transactions.map(transaction => ({
+      Descricao: transaction.description,
+      Categoria: transaction.category.name,
+      Data: transaction.date,
+      Metodo: transaction.method,
+      Valor: Number(transaction.amount)
+    }))
+  }
 }
