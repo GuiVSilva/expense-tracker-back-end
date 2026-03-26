@@ -3,10 +3,12 @@ import { usersRoutes } from './users.routes.js'
 import { authRoutes } from './auth.routes.js'
 import { categoriesRoutes } from './categories.routes.js'
 import { transactionsRoutes } from './transactions.routes.js'
+import { financialAccountsRoutes } from './financial-accounts.routes.js'
 
 export async function appRoutes(app: FastifyInstance) {
   app.register(usersRoutes, { prefix: '/users' })
   app.register(authRoutes, { prefix: '/auth' })
   app.register(categoriesRoutes, { prefix: '/categories' })
   app.register(transactionsRoutes, { prefix: '/transactions' })
+  app.register(financialAccountsRoutes, { prefix: '/financial-accounts' })
 }

@@ -8,6 +8,8 @@ import type { ICategoriesRepository } from '../../modules/categories/repositorie
 import { CategoriesRepository } from '../../modules/categories/repositories/implementations/CategoriesRepository.js'
 import { TransactionRepository } from '../../modules/transactions/repositories/implementations/TransactionRepository.js'
 import type { ITransactionRepository } from '../../modules/transactions/repositories/ITransactionRepository.js'
+import type { IFinancialAccountRepository } from '../../modules/financial-accounts/repositories/IFinancialAccountRepository.js'
+import { FinancialAccountRepository } from '../../modules/financial-accounts/repositories/implementations/FinancialAccountRepository.js'
 
 container.registerSingleton<IUsersRepository>(
   'UsersRepository',
@@ -27,4 +29,9 @@ container.registerSingleton<ICategoriesRepository>(
 container.registerSingleton<ITransactionRepository>(
   'TransactionRepository',
   TransactionRepository
+)
+
+container.registerSingleton<IFinancialAccountRepository>(
+  'FinancialAccountRepository',
+  FinancialAccountRepository
 )
