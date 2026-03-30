@@ -36,6 +36,7 @@ export class ListAccountUseCase {
   }: IRequest): Promise<{
     accounts: FinancialAccount[]
     total: number
+    summary: { receive: number; payment: number; winning: number; late: number }
   }> {
     const user = await this.usersRepository.findById(userId)
 

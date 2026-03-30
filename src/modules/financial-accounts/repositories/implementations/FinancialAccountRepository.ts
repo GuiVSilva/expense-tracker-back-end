@@ -19,7 +19,11 @@ export class FinancialAccountRepository implements IFinancialAccountRepository {
     status: string,
     category: string,
     userId: string
-  ): Promise<{ accounts: FinancialAccount[]; total: number }> {
+  ): Promise<{
+    accounts: FinancialAccount[]
+    total: number
+    summary: { receive: number; payment: number; winning: number; late: number }
+  }> {
     const normalizedSearch = search.trim()
     const normalizedType =
       type === 'all'
@@ -44,7 +48,22 @@ export class FinancialAccountRepository implements IFinancialAccountRepository {
       ...(normalizedCategory && { categoryId: normalizedCategory })
     }
 
-    const [accounts, total] = await prisma.$transaction([
+    const now = new Date()
+    const today = new Date(
+      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
+    )
+    const tomorrow = new Date(
+      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+    )
+
+    const [
+      accounts,
+      total,
+      receiveResult,
+      paymentResult,
+      winningResult,
+      lateResult
+    ] = await prisma.$transaction([
       prisma.financialAccount.findMany({
         where,
         include: {
@@ -61,8 +80,47 @@ export class FinancialAccountRepository implements IFinancialAccountRepository {
           createdAt: 'desc'
         }
       }),
-      prisma.financialAccount.count({ where })
+      prisma.financialAccount.count({ where }),
+      prisma.financialAccount.aggregate({
+        where: {
+          userId,
+          type: 'RECEIVABLE',
+          status: { notIn: ['PAID', 'CANCELED'] }
+        },
+        _sum: { amount: true }
+      }),
+      prisma.financialAccount.aggregate({
+        where: {
+          userId,
+          type: 'PAYABLE',
+          status: { notIn: ['PAID', 'CANCELED'] }
+        },
+        _sum: { amount: true }
+      }),
+      prisma.financialAccount.count({
+        where: {
+          userId,
+          dueDate: {
+            gte: today,
+            lt: tomorrow
+          },
+          status: { notIn: ['PAID', 'CANCELED'] }
+        }
+      }),
+      prisma.financialAccount.count({
+        where: {
+          userId,
+          dueDate: { lt: today },
+          status: { notIn: ['PAID', 'CANCELED'] }
+        }
+      })
     ])
-    return { accounts, total }
+
+    const receive = Number(receiveResult._sum.amount) || 0
+    const payment = Number(paymentResult._sum.amount) || 0
+    const winning = winningResult
+    const late = lateResult
+
+    return { accounts, total, summary: { receive, payment, winning, late } }
   }
 }

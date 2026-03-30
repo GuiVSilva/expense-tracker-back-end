@@ -14,5 +14,6 @@ export interface IFinancialAccountRepository {
   ): Promise<{
     accounts: FinancialAccount[]
     total: number
+    summary: { receive: number; payment: number; winning: number; late: number }
   }>
 }
