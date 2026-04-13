@@ -136,6 +136,10 @@ export class FinancialAccountRepository implements IFinancialAccountRepository {
     return { accounts, total, summary: { receive, payment, winning, late } }
   }
 
+  async delete(id: number): Promise<void> {
+    await prisma.financialAccount.delete({ where: { id } })
+  }
+
   async save(account: FinancialAccount): Promise<void> {
     await prisma.financialAccount.update({
       where: { id: account.id },

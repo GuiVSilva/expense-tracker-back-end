@@ -16,11 +16,16 @@ import {
   PaymentAccountController,
   type RegisterPaymentAccountBody
 } from '../../../modules/financial-accounts/useCases/paymentAccount/PaymentAccountController.js'
+import {
+  DeleteAccountController,
+  type DeleteAccountQuery
+} from '../../../modules/financial-accounts/useCases/deleteAccount/DeleteAccountController.js'
 
 const createAccountController = new CreateAccountController()
 const listAccountController = new ListAccountController()
 const updateAccountController = new UpdateAccountController()
 const paymentAccountController = new PaymentAccountController()
+const deleteAccountController = new DeleteAccountController()
 
 export async function financialAccountsRoutes(app: FastifyInstance) {
   app.addHook('onRequest', ensureAuthenticated)
@@ -40,4 +45,11 @@ export async function financialAccountsRoutes(app: FastifyInstance) {
   app.post<{ Body: RegisterPaymentAccountBody }>('/pay', (request, reply) => {
     paymentAccountController.handle(request, reply)
   })
+
+  app.delete<{ Querystring: DeleteAccountQuery }>(
+    '/delete',
+    (request, reply) => {
+      deleteAccountController.handle(request, reply)
+    }
+  )
 }

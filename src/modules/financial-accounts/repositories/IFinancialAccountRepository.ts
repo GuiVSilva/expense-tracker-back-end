@@ -21,5 +21,6 @@ export interface IFinancialAccountRepository {
     total: number
     summary: { receive: number; payment: number; winning: number; late: number }
   }>
+  delete(id: number): Promise<void>
   save(account: FinancialAccount): Promise<void>
 }

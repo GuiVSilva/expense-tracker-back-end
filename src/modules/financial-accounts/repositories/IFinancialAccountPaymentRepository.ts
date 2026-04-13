@@ -5,4 +5,7 @@ export interface IFinancialAccountPaymentRepository {
   create(
     data: ICreateFinancialAccountPaymentDTO
   ): Promise<FinancialAccountPayment>
+  findByAccountId(
+    financialAccountId: number
+  ): Promise<FinancialAccountPayment[]>
 }

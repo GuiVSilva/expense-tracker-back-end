@@ -12,4 +12,15 @@ export class FinancialAccountPaymentRepository implements IFinancialAccountPayme
     })
     return payment
   }
+
+  async findByAccountId(
+    financialAccountId: number
+  ): Promise<FinancialAccountPayment[]> {
+    const payments = await prisma.financialAccountPayment.findMany({
+      where: {
+        financialAccountId
+      }
+    })
+    return payments
+  }
 }
