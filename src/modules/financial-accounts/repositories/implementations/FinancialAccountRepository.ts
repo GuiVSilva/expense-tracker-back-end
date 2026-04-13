@@ -83,7 +83,8 @@ export class FinancialAccountRepository implements IFinancialAccountRepository {
               id: true,
               name: true
             }
-          }
+          },
+          financialAccountPayments: true
         },
         skip: (page - 1) * limit,
         take: limit,
