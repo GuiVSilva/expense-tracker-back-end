@@ -4,6 +4,7 @@ import type { ICreateTransactionDTO } from '../dto/ICreateTransactionDTO.js'
 export interface ITransactionRepository {
   create(data: ICreateTransactionDTO): Promise<void>
   findById(id: number): Promise<Transaction | null>
+  findByIdAndUserId(id: number, userId: string): Promise<Transaction | null>
   list(
     page: number,
     limit: number,

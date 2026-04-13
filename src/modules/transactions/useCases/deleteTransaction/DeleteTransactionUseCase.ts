@@ -23,7 +23,10 @@ export class DeleteTransactionUseCase {
 
     if (!user) throw new AppError('Usuário não encontrado')
 
-    const transaction = await this.transactionRepository.findById(id)
+    const transaction = await this.transactionRepository.findByIdAndUserId(
+      id,
+      userId
+    )
 
     if (!transaction) throw new AppError('Transação não encontrada')
 

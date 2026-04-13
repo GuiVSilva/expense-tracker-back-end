@@ -105,9 +105,9 @@ model FinancialAccount {
 }
 
 enum FinancialAccountPaymentMethod {
-  CASH        @map("cash")
+  MONEY       @map("money")
   PIX         @map("pix")
-  BANK_SLIP   @map("bank_slip")
+  TICKET      @map("ticket")
   CREDIT_CARD @map("credit_card")
   DEBIT_CARD  @map("debit_card")
   TRANSFER    @map("transfer")

@@ -23,6 +23,15 @@ export class TransactionRepository implements ITransactionRepository {
     return await prisma.transaction.findUnique({ where: { id } })
   }
 
+  async findByIdAndUserId(
+    id: number,
+    userId: string
+  ): Promise<Transaction | null> {
+    return await prisma.transaction.findFirst({
+      where: { id, userId }
+    })
+  }
+
   async list(
     page: number,
     limit: number,

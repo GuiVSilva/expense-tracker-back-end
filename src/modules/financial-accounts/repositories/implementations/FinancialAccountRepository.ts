@@ -11,6 +11,17 @@ export class FinancialAccountRepository implements IFinancialAccountRepository {
     return financialAccount
   }
 
+  async findById(id: number): Promise<FinancialAccount | null> {
+    return await prisma.financialAccount.findUnique({ where: { id } })
+  }
+
+  async findByIdAndUserId(
+    id: number,
+    userId: string
+  ): Promise<FinancialAccount | null> {
+    return await prisma.financialAccount.findFirst({ where: { id, userId } })
+  }
+
   async list(
     page: number,
     limit: number,
@@ -122,5 +133,12 @@ export class FinancialAccountRepository implements IFinancialAccountRepository {
     const late = lateResult
 
     return { accounts, total, summary: { receive, payment, winning, late } }
+  }
+
+  async save(account: FinancialAccount): Promise<void> {
+    await prisma.financialAccount.update({
+      where: { id: account.id },
+      data: account
+    })
   }
 }

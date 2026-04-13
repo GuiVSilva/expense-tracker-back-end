@@ -3,6 +3,11 @@ import type { ICreateFinancialAccountDTO } from '../dto/ICreateFinancialAccountD
 
 export interface IFinancialAccountRepository {
   create(data: ICreateFinancialAccountDTO): Promise<FinancialAccount>
+  findById(id: number): Promise<FinancialAccount | null>
+  findByIdAndUserId(
+    id: number,
+    userId: string
+  ): Promise<FinancialAccount | null>
   list(
     page: number,
     limit: number,
@@ -16,4 +21,5 @@ export interface IFinancialAccountRepository {
     total: number
     summary: { receive: number; payment: number; winning: number; late: number }
   }>
+  save(account: FinancialAccount): Promise<void>
 }

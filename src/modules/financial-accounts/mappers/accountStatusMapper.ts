@@ -6,3 +6,5 @@ export const accountStatusMap = {
   partial: AccountStatus.PARTIAL,
   overdue: AccountStatus.OVERDUE
 } as const
+
+export type AccountStatusKey = keyof typeof accountStatusMap

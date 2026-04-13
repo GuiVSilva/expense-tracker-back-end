@@ -1,14 +1,16 @@
 import { container } from 'tsyringe'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { CreateAccountUseCase } from './CreateAccountUseCase.js'
+import type { AccountTypeKey } from '../../mappers/accountTypeMapper.js'
+import type { AccountStatusKey } from '../../mappers/accountStatusMapper.js'
 
 export type CreateAccountBody = {
   description: string
-  type: 'payable' | 'receivable'
+  type: AccountTypeKey
   category: string
   amount: string
   dueDate: string
-  status: 'pending' | 'paid' | 'overdue' | 'partial'
+  status: AccountStatusKey
   installments: number
   splitInstallments: boolean
 }
