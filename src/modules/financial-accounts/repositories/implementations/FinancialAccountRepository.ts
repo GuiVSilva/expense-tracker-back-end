@@ -1,4 +1,5 @@
 import type { FinancialAccount } from '../../../../../generated/prisma/client.js'
+import { AccountStatus } from '../../../../../generated/prisma/enums.js'
 import { prisma } from '../../../../../lib/prisma.js'
 import type { ICreateFinancialAccountDTO } from '../../dto/ICreateFinancialAccountDTO.js'
 import { accountStatusMap } from '../../mappers/accountStatusMapper.js'
@@ -45,19 +46,7 @@ export class FinancialAccountRepository implements IFinancialAccountRepository {
       status === 'all'
         ? undefined
         : accountStatusMap[status as keyof typeof accountStatusMap]
-
     const normalizedCategory = category === 'all' ? undefined : Number(category)
-
-    const where = {
-      userId,
-      description: {
-        contains: normalizedSearch,
-        mode: 'insensitive' as const
-      },
-      ...(normalizedType && { type: normalizedType }),
-      ...(normalizedStatus && { status: normalizedStatus }),
-      ...(normalizedCategory && { categoryId: normalizedCategory })
-    }
 
     const now = new Date()
     const today = new Date(
@@ -66,6 +55,24 @@ export class FinancialAccountRepository implements IFinancialAccountRepository {
     const tomorrow = new Date(
       Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() + 1)
     )
+
+    const where = {
+      userId,
+      description: {
+        contains: normalizedSearch,
+        mode: 'insensitive' as const
+      },
+      ...(normalizedType && { type: normalizedType }),
+      ...(normalizedStatus &&
+        normalizedStatus !== AccountStatus.OVERDUE && {
+          status: normalizedStatus
+        }),
+      ...(normalizedStatus === AccountStatus.OVERDUE && {
+        dueDate: { lt: today },
+        status: { notIn: [AccountStatus.PAID, AccountStatus.CANCELED] }
+      }),
+      ...(normalizedCategory && { categoryId: normalizedCategory })
+    }
 
     const [
       accounts,
@@ -97,7 +104,7 @@ export class FinancialAccountRepository implements IFinancialAccountRepository {
         where: {
           userId,
           type: 'RECEIVABLE',
-          status: { notIn: ['PAID', 'CANCELED'] }
+          status: { notIn: [AccountStatus.PAID, AccountStatus.CANCELED] }
         },
         _sum: { amount: true }
       }),
@@ -105,7 +112,7 @@ export class FinancialAccountRepository implements IFinancialAccountRepository {
         where: {
           userId,
           type: 'PAYABLE',
-          status: { notIn: ['PAID', 'CANCELED'] }
+          status: { notIn: [AccountStatus.PAID, AccountStatus.CANCELED] }
         },
         _sum: { amount: true }
       }),
@@ -116,14 +123,14 @@ export class FinancialAccountRepository implements IFinancialAccountRepository {
             gte: today,
             lt: tomorrow
           },
-          status: { notIn: ['PAID', 'CANCELED'] }
+          status: { notIn: [AccountStatus.PAID, AccountStatus.CANCELED] }
         }
       }),
       prisma.financialAccount.count({
         where: {
           userId,
           dueDate: { lt: today },
-          status: { notIn: ['PAID', 'CANCELED'] }
+          status: { notIn: [AccountStatus.PAID, AccountStatus.CANCELED] }
         }
       })
     ])

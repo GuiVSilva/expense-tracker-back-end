@@ -5,7 +5,12 @@ import { AppError } from '../../../../shared/errors/AppError.js'
 import type { RegisterPaymentAccountBody } from './PaymentAccountController.js'
 import type { IFinancialAccountPaymentRepository } from '../../repositories/IFinancialAccountPaymentRepository.js'
 import { financialAccountPaymentMethodMap } from '../../mappers/accountPaymentMethodMapper.js'
-import { AccountStatus } from '../../../../../generated/prisma/enums.js'
+import {
+  AccountStatus,
+  AccountType,
+  TransactionType
+} from '../../../../../generated/prisma/enums.js'
+import type { ITransactionRepository } from '../../../transactions/repositories/ITransactionRepository.js'
 
 interface IRequest extends RegisterPaymentAccountBody {
   userId: string
@@ -21,7 +26,10 @@ export class PaymentAccountUseCase {
     private usersRepository: IUsersRepository,
 
     @inject('FinancialAccountPaymentRepository')
-    private financialAccountPaymentRepository: IFinancialAccountPaymentRepository
+    private financialAccountPaymentRepository: IFinancialAccountPaymentRepository,
+
+    @inject('TransactionRepository')
+    private transactionRepository: ITransactionRepository
   ) {}
 
   async execute({ id, amount, method, date, userId }: IRequest): Promise<void> {
@@ -50,6 +58,11 @@ export class PaymentAccountUseCase {
 
     account.updatedAt = new Date()
 
+    const typeTransaction =
+      account.type === AccountType.RECEIVABLE
+        ? TransactionType.INCOME
+        : TransactionType.EXPENSE
+
     await this.financialAccountRepository.save(account)
 
     await this.financialAccountPaymentRepository.create({
@@ -57,6 +70,16 @@ export class PaymentAccountUseCase {
       amount,
       method: mappedMethod,
       paymentDate: new Date(date)
+    })
+
+    await this.transactionRepository.create({
+      description: `Pagamento da conta ${account.description}`,
+      categoryId: account.categoryId,
+      amount,
+      type: typeTransaction,
+      date: new Date(date),
+      method: mappedMethod,
+      userId
     })
   }
 }
