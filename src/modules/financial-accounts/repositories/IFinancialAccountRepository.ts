@@ -21,6 +21,11 @@ export interface IFinancialAccountRepository {
     total: number
     summary: { receive: number; payment: number; winning: number; late: number }
   }>
+  listByMonth(
+    year: number,
+    month: number,
+    userId: string
+  ): Promise<FinancialAccount[]>
   delete(id: number): Promise<void>
   save(account: FinancialAccount): Promise<void>
 }

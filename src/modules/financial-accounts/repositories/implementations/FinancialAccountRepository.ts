@@ -143,6 +143,36 @@ export class FinancialAccountRepository implements IFinancialAccountRepository {
     return { accounts, total, summary: { receive, payment, winning, late } }
   }
 
+  async listByMonth(
+    year: number,
+    month: number,
+    userId: string
+  ): Promise<FinancialAccount[]> {
+    const startDate = new Date(Date.UTC(year, month - 1, 1))
+    const endDate = new Date(Date.UTC(year, month, 0))
+    endDate.setUTCHours(23, 59, 59, 999)
+
+    const accounts = await prisma.financialAccount.findMany({
+      where: {
+        userId,
+        dueDate: {
+          gte: startDate,
+          lte: endDate
+        }
+      },
+      include: {
+        category: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      }
+    })
+
+    return accounts
+  }
+
   async delete(id: number): Promise<void> {
     await prisma.financialAccount.delete({ where: { id } })
   }

@@ -20,12 +20,17 @@ import {
   DeleteAccountController,
   type DeleteAccountQuery
 } from '../../../modules/financial-accounts/useCases/deleteAccount/DeleteAccountController.js'
+import {
+  ListAccountByMonthController,
+  type ListAccountsByMonthQuery
+} from '../../../modules/financial-accounts/useCases/listAccountByMonth/ListAccountByMonthController.js'
 
 const createAccountController = new CreateAccountController()
 const listAccountController = new ListAccountController()
 const updateAccountController = new UpdateAccountController()
 const paymentAccountController = new PaymentAccountController()
 const deleteAccountController = new DeleteAccountController()
+const listAccountByMonthController = new ListAccountByMonthController()
 
 export async function financialAccountsRoutes(app: FastifyInstance) {
   app.addHook('onRequest', ensureAuthenticated)
@@ -50,6 +55,13 @@ export async function financialAccountsRoutes(app: FastifyInstance) {
     '/delete',
     (request, reply) => {
       deleteAccountController.handle(request, reply)
+    }
+  )
+
+  app.get<{ Querystring: ListAccountsByMonthQuery }>(
+    '/by-month',
+    (request, reply) => {
+      listAccountByMonthController.handle(request, reply)
     }
   )
 }
